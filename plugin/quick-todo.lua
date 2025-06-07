@@ -1,8 +1,8 @@
 -- In this file you define the User commands, i.t how the user will interact with your plugin.
 
 local sub_cmds = {
-  hello = require("base").hello,
-  bye = require("base").bye,
+  hello = require("plugin.quick-todo").hello,
+  bye = require("plugin.quick-todo").bye,
 }
 
 local sub_cmds_keys = {}
