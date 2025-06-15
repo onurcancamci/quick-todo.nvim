@@ -10,14 +10,14 @@ describe("QuickTodo Config", function()
 
     local opts = config.options
 
-    assert.is_table(opts.keys)
-    assert.is_equal("<leader>T", opts.keys.open)
+    assert(type(opts.keys) == "table")
+    assert(opts.keys.open == "<leader>T")
 
-    assert.is_table(opts.window)
-    assert.is_number(opts.window.height)
-    assert.is_number(opts.window.width)
-    assert.is_equal("rounded", opts.window.border)
-    assert.is_number(opts.window.winblend)
+    assert(type(opts.window) == "table")
+    assert(type(opts.window.height) == "number")
+    assert(type(opts.window.width) == "number")
+    assert(opts.window.border == "rounded")
+    assert(type(opts.window.winblend) == "number")
   end)
 
   it("overrides default options with user options", function()
@@ -34,10 +34,10 @@ describe("QuickTodo Config", function()
 
     local opts = config.options
 
-    assert.is_equal("Q", opts.keys.open)
-    assert.is_equal(0.5, opts.window.height)
-    assert.is_equal(0.4, opts.window.width)
-    assert.is_equal("single", opts.window.border)
-    assert.is_equal(20, opts.window.winblend)
+    assert(opts.keys.open == "Q")
+    assert(opts.window.height == 0.5)
+    assert(opts.window.width == 0.4)
+    assert(opts.window.border == "single")
+    assert(opts.window.winblend == 20)
   end)
 end)
