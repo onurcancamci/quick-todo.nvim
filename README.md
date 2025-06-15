@@ -1,116 +1,89 @@
-<h1 align="center">⛶&nbsp;&nbsp;base.nvim&nbsp;&nbsp;⛶ </h1>
+<h1 align="center">☑️ &nbsp;&nbsp;Quick Todo</h1>
 
-<p align="center">
-  <a href="https://github.com/S1M0N38/base.nvim/actions/workflows/run-tests.yml">
-    <img alt="Run Tests badge" src="https://img.shields.io/github/actions/workflow/status/S1M0N38/base.nvim/run-tests.yml?style=for-the-badge&label=Tests"/>
-  </a>
-  <a href="https://luarocks.org/modules/S1M0N38/base.nvim">
-    <img alt="LuaRocks badge" src="https://img.shields.io/luarocks/v/S1M0N38/base.nvim?style=for-the-badge&color=5d2fbf"/>
-  </a>
-  <a href="https://github.com/S1M0N38/base.nvim/releases">
-    <img alt="GitHub badge" src="https://img.shields.io/github/v/release/S1M0N38/base.nvim?style=for-the-badge&label=GitHub"/>
-  </a>
-  <a href="https://www.reddit.com/r/neovim/comments/195q8ai/template_for_writing_neovim_plugin/">
-    <img alt="Reddit badge" src="https://img.shields.io/badge/post-reddit?style=for-the-badge&label=Reddit&color=FF5700"/>
-  </a>
-</p>
+Quick Todo lets you quickly jot down and track project-scoped todos;
+with minimal disruption to your flow.
 
-______________________________________________________________________
+This plugin addresses a recurring annoyance in my workflow.
+When I am in the middle of a change (especially in a flow state), writing down a
+random idea or necessary todo can be annoying and often disruptive.
 
-Writing a Neovim plugin has become very easy. Lua rocks! (pun intended), busted, LuaLS, and CI/CD pipelines make the development process a breeze.
+- I have tried creating a new item in Linear/Jira/Obsidian but that is a heavy
+  context switch
+- I have tried maintaining a local `tasks.md` in the repo but then I have
+  to check it in, `.gitignore` it or do nothing and work around it popping up everytime
+  I do common git operations
+- Prior to this, I would use a random notepad but that is not as organized
+  and is disconnected from the project
 
-1. Choose a name with the extension `.nvim`, e.g., `your-plugin.nvim`.
-1. On the top right of this page, click on `Use this template` > `Create a new repository` with that name.
-1. Clone your new repo and `cd` into it.
-1. Rename `base` to `your-plugin` in the whole repo.
-1. Rename `S1M0N38` to `your-github-username` in the whole repo.
+Quick Todo is simple, just press a key to toggle a project-scoped todo list in
+markdown. Quickly jot down the task (and any notes), press the same key to close
+and move on.
 
-### 🛠️ Setup
+![Quick Todo Demo](./img/example.png)
+
+## Details
+
+- The todo files are currently saved in the quick-todo plugin folder under
+  `stdpath("data")`(run `echo stdpath("data")` to see what that maps to).
+  Each todo file is saved in a sub folder based on the current working directory of
+  each project.
+
+## 🛠️ Setup
 
 - **Neovim** (≥ 0.10)
 
-- **[luarocks](https://luarocks.org/)**, **[busted](https://lunarmodules.github.io/busted/)**, and **[nlua](https://github.com/mfussenegger/nlua)** (macOS [install.sh](https://gist.githubusercontent.com/S1M0N38/44c573db63864bcd1dc0bfc73359fec9/raw/d92e3b3e5f3da1c8557e93250e6e8a7de0f7d09a/install-lua-luarocks-on-macos.sh) and [uninstall.sh](https://gist.githubusercontent.com/S1M0N38/44c573db63864bcd1dc0bfc73359fec9/raw/d92e3b3e5f3da1c8557e93250e6e8a7de0f7d09a/uninstall-lua-luarocks-on-macos.sh) scripts)
-
-- **[lazy.nvim](https://github.com/folke/lazy.nvim)** and **[lazydev.nvim](https://github.com/folke/lazydev.nvim)**
+### Installation
 
 ```lua
+-- lazy.nvim
 {
-  {
-    "base.nvim",
-    dir = "/path/to/base.nvim",
-    lazy = false,
-    opts = {},
-    keys = {
-      {
-        "<leader>rb",
-        "<cmd>Lazy reload base.nvim<cr>",
-        desc = "Reload base.nvim",
-        mode = { "n", "v" },
-      },
-    },
-  },
-
-  {
-    "folke/lazydev.nvim",
-    ft = "lua",
-    opts = {
-      library = {
-        "${3rd}/luassert/library",
-        "${3rd}/busted/library",
-        "base.nvim",
-      }
-    },
-  },
+  "SyedAsimShah1/quick-todo.nvim",
+  config = function()
+    require("quick-todo").setup()
+  end
 }
 ```
 
-### 📁 Plugin Structure
+### Configuration
 
-- ***plugin/base.lua*** - the main file, the one loaded by the plugin manager.
+```lua
+-- Values below are the defaults
+{
+  "SyedAsimShah1/quick-todo.nvim",
+  config = function()
+    require("quick-todo").setup({
+      keys = {
+        open = "<leader>T",
+      },
+      window = {
+        height = 0.5,
+        width = 0.5,
+        winblend = 0,
+        border = "rounded",
+      }
+    })
+  end
+}
+```
 
-- ***spec/base_spec.lua*** - plugin tests. Add other ***\_spec.lua*** files here for further testing.
+## Future Thoughts
 
-- ***lua/base/***
+The following are some features that I will likely add or am considering:
 
-  - ***init.lua*** - the main file of the plugin, the one loaded by ***plugin/base.lua***.
-  - ***health.lua*** - run checks of the plugin when `:checkhealth base` is called.
-  - ***types.lua*** - a [definition file](https://luals.github.io/wiki/definition-files/) where LuaCATS annotations are defined.
+- Key to toggle todo state
+- Integration with lualine to show the current todo (I'd first have to
+  introduce the concept of a current todo)
+- Config option to render the Todo window on the side instead of a floating one
+- Some auto reordering of complete todos so the incomplete ones appear at the top
+- Maybe pagenation to deal with long todo lists
 
-### 🔍 Lua Language Server
+## 👏 Similar Plugins
 
-[Lua Language Server](https://github.com/luals/lua-language-server?tab=readme-ov-file) (LuaLS) is a language server providing autocompletion, hover, diagnostics, annotations support, formatting. The `lazydev.nvim` plugin takes care of configuring it properly.
+Below are a list of existing plugins that help manage todos. I looked at each of
+them and thank the authors for their great work but they didn't quite fit my
+use case (there is also a bit of wanting to publish and use my first plugin).
+Check them out and see if they are a better fit for you:
 
-- ***.editorconfig*** - file format for defining coding styles (cross-editor).
-
-### 🧪 Tests
-
-[Busted](https://lunarmodules.github.io/busted/) is a unit testing framework for Lua. Using [nlua](https://github.com/mfussenegger/nlua) as Lua interpreter gives you access to Neovim Lua API while running tests. To run tests, simply run `busted` from the root of the plugin.
-
-- ***.busted*** - configuration file for Busted which specifies nlua as the Lua interpreter.
-
-### 📚 Documentation
-
-It's important to document your plugin in the Vim/Neovim way so it's easily accessible from within the editor.
-
-- ***doc/base.txt*** - documentation file for the plugin formatted as vimdoc.
-
-### 📦 CI/CD
-
-It's no secret that the Neovim plugin ecosystem can be brittle. Prove them wrong with:
-
-- ***.github/workflows/***
-  - ***run-tests.yml*** - workflow to run tests on every push to the main branch.
-  - ***run-typecheck.yml*** - workflow to typecheck code on every push.
-  - ***release-github.yml*** - workflow to create a new release on GitHub on every push to the main branch.
-  - ***release-luarocks.yml*** - workflow to create a new release on LuaRocks on every release on GitHub.
-
-Write your commit messages following [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification and let the CI/CD do the rest.
-
-### 👏 Resources
-
-Neovim is growing a nice ecosystem, but some parts of plugin development are sometimes obscure. This template is an attempt to put together some best practices. Here are sources on which this template is based and that I constantly refer to:
-
-- [nvim-best-practices](https://github.com/nvim-neorocks/nvim-best-practices): Collection of DOs and DON'Ts for modern Neovim Lua plugin development
-- [nvim-lua-plugin-template](https://github.com/nvim-lua/nvim-lua-plugin-template/): Another template for Neovim Lua plugins
-- [LuaCATS annotations](https://luals.github.io/wiki/annotations/): Add type annotations to your Lua code
-- [Plugin development walkthrough](https://youtu.be/n4Lp4cV8YR0?si=lHlxQBNvbTcXPhVY) by [TJ DeVries](https://github.com/tjdevries): it uses plenary instead of busted for testing
+- [checkmate.nvim](https://github.com/bngarren/checkmate.nvim)
+- [dooing.nvim](https://github.com/atiladefreitas/dooing)
+- [doing.nvim](https://github.com/Hashino/doing.nvim)
