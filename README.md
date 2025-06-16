@@ -10,9 +10,9 @@ random idea or necessary todo can be annoying and often disruptive.
 - I have tried creating a new item in Linear/Jira/Obsidian but that is a heavy
   context switch
 - I have tried maintaining a local `tasks.md` in the repo but then I have
-  to check it in, `.gitignore` it or do nothing and work around it popping up everytime
+  to check it in, `.gitignore` it or do nothing and work around the file popping up everytime
   I do common git operations
-- Prior to this, I would use a random notepad but that is not as organized
+- Prior to this, I would use a random notepad but that is not organized
   and is disconnected from the project
 
 Quick Todo is simple, just press a key to toggle a project-scoped todo list in
@@ -79,8 +79,8 @@ The following are some features that I will likely add or am considering:
 
 ## 👏 Similar Plugins
 
-Below are a list of existing plugins that help manage todos. I looked at each of
-them and thank the authors for their great work but they didn't quite fit my
+Below is a list of existing plugins that help manage todos. I looked at each of
+them and thank the authors for the great work but the plugins didn't quite fit my
 use case (there is also a bit of wanting to publish and use my first plugin).
 Check them out and see if they are a better fit for you:
 
