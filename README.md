@@ -77,7 +77,7 @@ The following are some features that I will likely add or am considering:
 - Some auto reordering of complete todos so the incomplete ones appear at the top
 - Maybe pagenation to deal with long todo lists
 
-## 👏 Similar Plugins
+## Similar Plugins
 
 Below is a list of existing plugins that help manage todos. I looked at each of
 them and thank the authors for the great work but the plugins didn't quite fit my

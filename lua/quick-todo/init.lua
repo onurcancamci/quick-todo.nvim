@@ -31,6 +31,9 @@ M.setup = function(opts)
     group = "QuickTodoWindowKeymaps",
     pattern = "*",
     callback = function(args)
+      if state.buffer == -1 then
+        return
+      end
       if state.buffer ~= -1 and args.buf ~= state.buffer then
         return
       end

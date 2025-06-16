@@ -1,9 +1,21 @@
 ================================================================================
 INTRODUCTION                                                            *quick-todo*
 
-quick-todo.nvim is a template plugin for Neovim that serves as a starting point for
-creating new plugins. It provides a structured foundation with best practices
-for modern Neovim plugin development.
+Quick Todo lets you quickly jot down and track project-scoped todos;
+with minimal disruption to your flow.
+
+This plugin addresses a recurring annoyance in my workflow.
+When I am in the middle of a change (especially in a flow state), writing down a
+random idea or necessary todo can be annoying and often disruptive.
+
+Quick Todo is simple, just press a key to toggle a project-scoped todo list in
+markdown. Quickly jot down the task (and any notes), press the same key to close
+and move on.
+
+The todo files are currently saved in the quick-todo plugin folder under
+`stdpath("data")`(run `echo stdpath("data")` to see what that maps to).
+Each todo file is saved in a sub folder based on the current working directory of
+each project.
 
 Table of contents:
 
@@ -19,27 +31,22 @@ REQUIREMENTS                                               *quick-todo-requireme
 Before using quick-todo.nvim, ensure you have the following:
 
 - Neovim (>= 0.10)
-- luarocks (https://luarocks.org/)
-- busted (https://lunarmodules.github.io/busted/)
-- nlua (https://github.com/mfussenegger/nlua)
-
-For development:
-- lazy.nvim (https://github.com/folke/lazy.nvim)
-- lazydev.nvim (https://github.com/folke/lazydev.nvim)
 
 ================================================================================
 INSTALLATION                                               *quick-todo-installation*
 
 It's recommended to use a plugin manager like lazy.nvim to install quick-todo.nvim:
-
 >lua
-    { "SyedAsimShah1/quick-todo.nvim", opts = { } }
-<
+    {
+      "SyedAsimShah1/quick-todo.nvim",
+      config = function()
+        require("quick-todo").setup()
+      end
+    }
 
 ================================================================================
 CONFIGURATION                                                    *quick-todo-config*
 
-                                                                *quick-todo.setup()*
 quick-todo.setup({opts}) ~
 
 The `quick-todo.setup()` function sets up the plugin with user-provided options.
@@ -47,7 +54,15 @@ Here are the available options:
 
 >lua
   {
-    name = "John Doe" -- The name of the user (default)
+    keys = {
+      open = "<leader>T", -- They key to toggle the todo window
+    },
+    window = { -- Options to control the looks for the todo window
+      height = 0.5,
+      width = 0.5,
+      winblend = 0,
+      border = "rounded",
+    },
   }
 <
 
@@ -56,10 +71,9 @@ COMMANDS                                                       *quick-todo-comma
 
 quick-todo.nvim provides the following command:
 
-:quick-todo [subcommand] ~
+:QuickTodo [subcommand] ~
   Execute a quick-todo.nvim subcommand. Available subcommands:
-  - `hello`: Say hello to the user
-  - `bye`: Say bye to the user
+  - `open`: toggle the todo window
 
   If no subcommand is provided or an invalid subcommand is used, an error
   message will be displayed.
@@ -74,13 +88,10 @@ quick-todo.setup({opts}) ~
   Set up the plugin with the given options. See |quick-todo-config| for available
   options.
 
-                                                                *quick-todo.hello()*
-quick-todo.hello() ~
-  Say hello to the user. Returns a string with the greeting message.
-
-                                                                  *quick-todo.bye()*
-quick-todo.bye() ~
-  Say bye to the user. Returns a string with the farewell message.
+                                                                *quick-todo.open_todo()*
+quick-todo.open_todo() ~
+  Toggle the todo window. Once a window is open, you can also close the window
+  using "q" or "ctrl-c".
 
 
 ================================================================================
