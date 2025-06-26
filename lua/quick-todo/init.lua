@@ -3,7 +3,6 @@ local M = {}
 local state = {
   window = -1,
   buffer = -1,
-  location = "",
 }
 
 local function sanitize_path(path)
@@ -11,16 +10,13 @@ local function sanitize_path(path)
 end
 
 local function get_save_location()
-  if state.location == "" then
-    local cwd = vim.fn.getcwd()
-    local data_dir = vim.fn.stdpath("data") .. "/quick-todo/"
-    local file_dir = data_dir .. sanitize_path(cwd)
-    local file_path = file_dir .. "/todo.md"
+  local cwd = vim.fn.getcwd()
+  local data_dir = vim.fn.stdpath("data") .. "/quick-todo/"
+  local file_dir = data_dir .. sanitize_path(cwd)
+  local file_path = file_dir .. "/todo.md"
 
-    vim.fn.mkdir(file_dir, "p")
-    state.location = file_path
-  end
-  return state.location
+  vim.fn.mkdir(file_dir, "p")
+  return file_path
 end
 
 local function create_window()
@@ -41,12 +37,19 @@ local function create_window()
       footer = string.format("Project: %s", vim.fn.getcwd()),
       footer_pos = "left",
     }
+
+    local current_win = vim.api.nvim_get_current_win()
+    local sign_column_value = vim.api.nvim_get_option_value("signcolumn", { win = current_win })
+    local relativenumber_value = vim.api.nvim_get_option_value("relativenumber", { win = current_win })
+    local number_value = vim.api.nvim_get_option_value("number", { win = current_win })
+
     local win = vim.api.nvim_open_win(state.buffer, true, config)
-    vim.wo[win].winblend = winblend
     state.window = win
 
-    vim.wo[win].signcolumn = "yes:2"
-    vim.wo[win].relativenumber = true
+    vim.wo[win].winblend = winblend
+    vim.wo[win].signcolumn = sign_column_value
+    vim.wo[win].number = number_value
+    vim.wo[win].relativenumber = relativenumber_value
     return win
   else
     return state.window
@@ -60,11 +63,11 @@ local function get_buffer()
   end
 
   local bufnr = vim.fn.bufnr(path, false)
+  local is_valid = bufnr > 0 and vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_buf_is_loaded(bufnr)
 
-  if bufnr == -1 then
+  if not is_valid then
+    -- bufnr = vim.api.nvim_create_buf(false, false)
     bufnr = vim.fn.bufnr(path, true)
-
-    vim.print(bufnr)
 
     vim.api.nvim_buf_set_name(bufnr, path)
     state.buffer = bufnr
@@ -76,7 +79,7 @@ local function get_buffer()
 
     vim.bo[bufnr].buftype = ""
     vim.bo[bufnr].buflisted = false -- not in :ls
-    vim.bo[bufnr].bufhidden = "hide" -- hide instead of wipe
+    vim.bo[bufnr].bufhidden = "wipe" -- hide instead of wipe
     vim.bo[bufnr].filetype = "markdown"
     vim.bo[bufnr].modifiable = true
     vim.bo[bufnr].swapfile = false
@@ -132,7 +135,6 @@ M.setup = function(opts)
       end
       state.window = -1
       state.buffer = -1
-      state.location = ""
     end,
   })
 end
