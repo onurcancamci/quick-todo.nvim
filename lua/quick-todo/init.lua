@@ -1,55 +1,10 @@
 local M = {}
 
 local state = {
-  visible = false,
   window = -1,
   buffer = -1,
   location = "",
 }
-
----Setup the quick-todo plugin
----@param opts Options: plugin options
-M.setup = function(opts)
-  require("quick-todo.config").setup(opts)
-  require("quick-todo.commands").setup()
-
-  vim.api.nvim_create_autocmd("DirChanged", {
-    callback = function()
-      if state.visible and vim.api.nvim_win_is_valid(state.window) then
-        vim.api.nvim_win_close(state.window, false)
-      end
-      state.visible = false
-      state.window = -1
-      state.buffer = -1
-      state.location = ""
-    end,
-  })
-
-  vim.api.nvim_create_augroup("QuickTodoWindowKeymaps", { clear = true })
-
-  vim.api.nvim_create_autocmd("BufEnter", {
-    group = "QuickTodoWindowKeymaps",
-    pattern = "*",
-    callback = function(args)
-      if state.buffer == -1 then
-        return
-      end
-      if state.buffer ~= -1 and args.buf ~= state.buffer then
-        return
-      end
-
-      local options = { buffer = args.buf, desc = "Close QuickTodo", silent = true }
-
-      vim.keymap.set("n", "q", function()
-        require("quick-todo").open_todo()
-      end, options)
-
-      vim.keymap.set("n", "<C-c>", function()
-        require("quick-todo").open_todo()
-      end, options)
-    end,
-  })
-end
 
 local function sanitize_path(path)
   return path:gsub("[/\\]", "__")
@@ -68,26 +23,7 @@ local function get_save_location()
   return state.location
 end
 
-local function update_window_and_buffer()
-  if state.buffer == -1 or not vim.api.nvim_buf_is_valid(state.buffer) then
-    local buffer = vim.api.nvim_create_buf(false, false)
-    local todo_file = get_save_location()
-
-    if vim.fn.filereadable(todo_file) == 1 then
-      local lines = vim.fn.readfile(todo_file)
-      vim.api.nvim_buf_set_lines(buffer, 0, -1, false, lines)
-    else
-      vim.api.nvim_buf_set_lines(buffer, 0, -1, false, { "# Project", "", "- [ ] Example todo" })
-    end
-
-    vim.api.nvim_buf_set_name(buffer, todo_file)
-    vim.bo[buffer].filetype = "markdown"
-    vim.bo[buffer].bufhidden = "hide"
-    vim.bo[buffer].swapfile = false
-
-    state.buffer = buffer
-  end
-
+local function create_window()
   if state.window == -1 or not vim.api.nvim_win_is_valid(state.window) then
     local opts = require("quick-todo.config").options or {}
     local width = math.floor(vim.o.columns * opts.window.width)
@@ -108,32 +44,97 @@ local function update_window_and_buffer()
     local win = vim.api.nvim_open_win(state.buffer, true, config)
     vim.wo[win].winblend = winblend
     state.window = win
+
+    vim.wo[win].signcolumn = "yes:2"
+    vim.wo[win].relativenumber = true
+    return win
+  else
+    return state.window
   end
 end
 
----Open todo window
-M.open_todo = function()
-  if state.visible then
-    if vim.api.nvim_buf_is_valid(state.buffer) and vim.bo[state.buffer].modified then
-      local lines = vim.api.nvim_buf_get_lines(state.buffer, 0, -1, false)
-      vim.fn.writefile(lines, get_save_location())
-      vim.bo[state.buffer].modified = false
-    end
-
-    if vim.api.nvim_win_is_valid(state.window) then
-      local success = pcall(vim.api.nvim_win_hide, state.window)
-      if not success then
-        vim.api.nvim_win_close(state.window, false)
-      end
-    end
-    state.visible = false
-    state.window = -1
-
-    return
+local function get_buffer()
+  local path = get_save_location()
+  if vim.fn.filereadable(path) == 0 then
+    vim.fn.writefile({}, path)
   end
 
-  update_window_and_buffer()
-  state.visible = true
+  local bufnr = vim.fn.bufnr(path, false)
+
+  if bufnr == -1 then
+    bufnr = vim.fn.bufnr(path, true)
+
+    vim.print(bufnr)
+
+    vim.api.nvim_buf_set_name(bufnr, path)
+    state.buffer = bufnr
+
+    if vim.api.nvim_buf_line_count(bufnr) == 1 and vim.api.nvim_buf_get_lines(bufnr, 0, 1, false)[1] == "" then
+      local lines = vim.fn.readfile(path)
+      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+    end
+
+    vim.bo[bufnr].buftype = ""
+    vim.bo[bufnr].buflisted = false -- not in :ls
+    vim.bo[bufnr].bufhidden = "hide" -- hide instead of wipe
+    vim.bo[bufnr].filetype = "markdown"
+    vim.bo[bufnr].modifiable = true
+    vim.bo[bufnr].swapfile = false
+    vim.bo[bufnr].readonly = false
+    vim.bo[bufnr].undofile = true
+
+    vim.api.nvim_buf_call(bufnr, function()
+      vim.cmd("checktime") -- update timestamp
+      vim.cmd("set nomodified") -- optional safety to clear mod flag
+    end)
+
+    vim.keymap.set("n", "q", "<cmd>quit<cr>", { buffer = bufnr, silent = true })
+    vim.keymap.set("n", "<C-c>", "<cmd>quit<cr>", { buffer = bufnr, silent = true })
+  end
+
+  return bufnr
+end
+
+local function actual_open_window()
+  local bufnr = get_buffer()
+
+  local win = create_window()
+  vim.api.nvim_win_set_buf(win, bufnr)
+end
+
+local function close_window()
+  if vim.api.nvim_win_is_valid(state.window) then
+    local success = pcall(vim.api.nvim_win_hide, state.window)
+    if not success then
+      vim.api.nvim_win_close(state.window, false)
+    end
+  end
+end
+
+M.open_todo = function()
+  if vim.api.nvim_win_is_valid(state.window) then
+    close_window()
+  else
+    actual_open_window()
+  end
+end
+
+---Setup the quick-todo plugin
+---@param opts Options: plugin options
+M.setup = function(opts)
+  require("quick-todo.config").setup(opts)
+  require("quick-todo.commands").setup()
+
+  vim.api.nvim_create_autocmd("DirChanged", {
+    callback = function()
+      if vim.api.nvim_win_is_valid(state.window) then
+        close_window()
+      end
+      state.window = -1
+      state.buffer = -1
+      state.location = ""
+    end,
+  })
 end
 
 return M
