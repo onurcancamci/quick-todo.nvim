@@ -73,10 +73,10 @@ local function get_buffer()
     state.buffer = bufnr
 
     -- just in case
-    if vim.api.nvim_buf_line_count(bufnr) == 1 and vim.api.nvim_buf_get_lines(bufnr, 0, 1, false)[1] == "" then
-      local lines = vim.fn.readfile(path)
-      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-    end
+    -- if vim.api.nvim_buf_line_count(bufnr) == 1 and vim.api.nvim_buf_get_lines(bufnr, 0, 1, false)[1] == "" then
+    --   local lines = vim.fn.readfile(path)
+    --   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+    -- end
 
     vim.bo[bufnr].buftype = ""
     vim.bo[bufnr].buflisted = false -- not in :ls
@@ -85,12 +85,12 @@ local function get_buffer()
     vim.bo[bufnr].modifiable = true
     vim.bo[bufnr].swapfile = false
     vim.bo[bufnr].readonly = false
-    vim.bo[bufnr].undofile = true
+    vim.bo[bufnr].undofile = false
 
-    vim.api.nvim_buf_call(bufnr, function()
-      vim.cmd("checktime") -- update timestamp
-      vim.cmd("set nomodified") -- optional safety to clear mod flag
-    end)
+    -- vim.api.nvim_buf_call(bufnr, function()
+    --   vim.cmd("checktime") -- update timestamp
+    --   vim.cmd("set nomodified") -- optional safety to clear mod flag
+    -- end)
 
     vim.keymap.set("n", "q", "<cmd>quit<cr>", { buffer = bufnr, silent = true })
     vim.keymap.set("n", "<C-c>", "<cmd>quit<cr>", { buffer = bufnr, silent = true })
