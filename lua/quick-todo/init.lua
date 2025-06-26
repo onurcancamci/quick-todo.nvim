@@ -59,7 +59,7 @@ end
 local function get_buffer()
   local path = get_save_location()
   if vim.fn.filereadable(path) == 0 then
-    vim.fn.writefile({}, path)
+    vim.fn.writefile({}, path, "s")
   end
 
   local bufnr = vim.fn.bufnr(path, false)
@@ -72,6 +72,7 @@ local function get_buffer()
     vim.api.nvim_buf_set_name(bufnr, path)
     state.buffer = bufnr
 
+    -- just in case
     if vim.api.nvim_buf_line_count(bufnr) == 1 and vim.api.nvim_buf_get_lines(bufnr, 0, 1, false)[1] == "" then
       local lines = vim.fn.readfile(path)
       vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
